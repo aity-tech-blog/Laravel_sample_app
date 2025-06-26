@@ -5,12 +5,9 @@ use App\Http\Controllers\HelloController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ContactController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
 
 // テンプレートをview関数で指定する。
-Route::get('/hello', [HelloController::class, 'index']);
+Route::get('/', [HelloController::class, 'index']);
 // ユーザー情報を表示するルート
 Route::get('/user', [UserController::class, 'user_search'])->name('user');
 
