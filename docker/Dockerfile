@@ -34,9 +34,9 @@ RUN php artisan config:clear \
     && php artisan view:cache
 
 # 必要なディレクトリの権限調整
-RUN chown -R www-data:www-data /var/www \
-    && chmod -R 755 /var/www/storage \
-    && chmod -R 755 /var/www/bootstrap/cache
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html/storage \
+    && chmod -R 755 /var/www/html/bootstrap/cache
 
 # ポート公開
 EXPOSE 80
