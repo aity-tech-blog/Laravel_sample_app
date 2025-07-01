@@ -1,28 +1,26 @@
-FROM php:8.3-fpm
+FROM php:8.3-apache
 
-# 必要なパッケージと拡張をインストール
+# PHP拡張のインストール
 RUN apt-get update && apt-get install -y \
-    git unzip curl zip libzip-dev libpng-dev libonig-dev libxml2-dev \
-    nginx gettext-base \
-    && docker-php-ext-install zip pdo pdo_mysql mbstring exif pcntl bcmath
+    libzip-dev zip unzip libpng-dev libonig-dev libxml2-dev \
+    && docker-php-ext-install pdo pdo_mysql zip mbstring exif
 
-# Composer インストール
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+# Composerのインストール
+RUN curl -sS https://getcomposer.org/installer | php \
+    && mv composer.phar /usr/local/bin/composer
+
+# Apache mod_rewrite を有効化
+RUN a2enmod rewrite
+
+# vhost 設定を差し替え
+COPY docker/apache-vhost.conf /etc/apache2/sites-available/000-default.conf
+
+# .htaccess を有効にするための設定
+RUN sed -i 's/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
 
 # 作業ディレクトリ
-WORKDIR /var/www
+WORKDIR /var/www/html
 
-# Laravel プロジェクトをコピー
-COPY . .
-
-# 依存インストール（--no-dev で本番用）
+# Laravel依存インストール（ビルド時のみ）
+COPY . /var/www/html
 RUN composer install --no-dev --optimize-autoloader
-
-# パーミッション修正（必要であれば）
-RUN chown -R www-data:www-data /var/www && chmod -R 755 /var/www
-
-# nginx.confをコピー
-COPY ./docker/nginx.conf /etc/nginx/templates/default.conf.template
-
-# エントリポイント（nginxとphp両方起動）
-CMD sh -c "envsubst '\$PORT' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf && nginx && php-fpm"
