@@ -19,7 +19,7 @@ COPY docker/apache-vhost.conf /etc/apache2/sites-available/000-default.conf
 RUN sed -i 's/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
 
 # 作業ディレクトリ
-WORKDIR /var/www
+WORKDIR /var/www/html
 
 # プロジェクトファイルをコピー
 COPY . .
